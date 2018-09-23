@@ -25,12 +25,20 @@ def check_queue(id):
 async def on_ready():
     print("svenBot is now online.")
 
+# Removes the commands from Discord after being executed - clearing up all the clutter.
+@client.event
+async def on_message(message):
+    if message.content.startswith("!"):
+        await client.delete_message(message)
+    await client.process_commands(message)
+
 @client.command(pass_context=True)
 async def vol(ctx, value: int):
     server_id = ctx.message.server.id
     players[server_id].volume = value / 100
     await client.say("**Volume set to:** " + str(value) + "%")
 
+# Will summon the bot and play media.
 @client.command(pass_context=True)
 async def play(ctx, url):
     channel = ctx.message.author.voice.voice_channel
