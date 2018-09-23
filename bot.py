@@ -43,16 +43,17 @@ async def vol(ctx, value: int):
 # Will summon the bot and play media. With the command message auto delete, the play function will only show in text what is currently playing.
 @client.command(pass_context=True)
 async def play(ctx, url):
-    ydl.add_default_info_extractors()
-    info = ydl.extract_info(url, download=False)
     channel = ctx.message.author.voice.voice_channel
     await client.join_voice_channel(channel)
     server = ctx.message.server
     voice_client = client.voice_client_in(server)
-    player = await voice_client.create_ytdl_player(url, after=lambda: check_queue(server.id))
+    opts = {"default_search": "auto", "format": "bestaudio/best", "skip_download": True}
+    player = await voice_client.create_ytdl_player(url, ytdl_options=opts, after=lambda: check_queue(server.id))
     players[server.id] = player
     player.volume = 0.15
     player.start()
+    ydl.add_default_info_extractors()
+    info = ydl.extract_info(url, download=False)
     await client.say("**Playing:** " + info["title"])
 
 @client.command(pass_context=True)
