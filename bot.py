@@ -1,6 +1,7 @@
 import discord
 import logging
 import youtube_dl
+from youtube_dl import YoutubeDL
 from discord.ext import commands
 from docs.config import token
 
@@ -14,6 +15,7 @@ logger.addHandler(handler)
 
 players = {}
 queues = {}
+ydl = YoutubeDL()
 
 def check_queue(id):
     if queues[id] != []:
@@ -38,9 +40,11 @@ async def vol(ctx, value: int):
     players[server_id].volume = value / 100
     await client.say("**Volume set to:** " + str(value) + "%")
 
-# Will summon the bot and play media.
+# Will summon the bot and play media. With the command message auto delete, the play function will only show in text what is currently playing.
 @client.command(pass_context=True)
 async def play(ctx, url):
+    ydl.add_default_info_extractors()
+    info = ydl.extract_info(url, download=False)
     channel = ctx.message.author.voice.voice_channel
     await client.join_voice_channel(channel)
     server = ctx.message.server
@@ -49,6 +53,7 @@ async def play(ctx, url):
     players[server.id] = player
     player.volume = 0.15
     player.start()
+    await client.say("**Playing:** " + info["title"])
 
 @client.command(pass_context=True)
 async def resume(ctx):
