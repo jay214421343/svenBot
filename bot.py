@@ -26,10 +26,10 @@ async def on_ready():
     print("svenBot is now online.")
 
 @client.command(pass_context=True)
-async def leave(ctx):
-    server = ctx.message.server
-    voice_client = client.voice_client_in(server)
-    await voice_client.disconnect()
+async def vol(ctx, value: int):
+    server_id = ctx.message.server.id
+    players[server_id].volume = value / 100
+    await client.say("**Volume set to:** " + str(value) + "%")
 
 @client.command(pass_context=True)
 async def play(ctx, url):
@@ -39,25 +39,32 @@ async def play(ctx, url):
     voice_client = client.voice_client_in(server)
     player = await voice_client.create_ytdl_player(url, after=lambda: check_queue(server.id))
     players[server.id] = player
-    player.start(volume=0.1)
+    player.volume = 0.15
+    player.start()
 
 @client.command(pass_context=True)
 async def resume(ctx):
     server_id = ctx.message.server.id
     players[server_id].resume()
-    await client.say("Resuming video..")
+    await client.say("**Resuming video..**")
 
 @client.command(pass_context=True)
 async def pause(ctx):
     server_id = ctx.message.server.id
     players[server_id].pause()
-    await client.say("Pausing video..")
+    await client.say("**Pausing video..**")
 
 @client.command(pass_context=True)
 async def stop(ctx):
     server_id = ctx.message.server.id
     players[server_id].stop()
-    await client.say("Stopping video..")
+    await client.say("**Stopping video..**")
+
+@client.command(pass_context=True)
+async def leave(ctx):
+    server = ctx.message.server
+    voice_client = client.voice_client_in(server)
+    await voice_client.disconnect()
 
 @client.command(pass_context=True)
 async def queue(ctx, url):
@@ -70,6 +77,6 @@ async def queue(ctx, url):
     else:
         queues[server.id] = [player]
 
-    await client.say("Queueing video..")
+    await client.say("**Queueing video..**")
 
 client.run(token)
