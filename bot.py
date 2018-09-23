@@ -40,9 +40,9 @@ async def vol(ctx, value: int):
     players[server_id].volume = value / 100
     await client.say("**Volume set to:** " + str(value) + "%")
 
-# Will summon the bot and play media. With the command message auto delete, the play function will only show in text what is currently playing.
+# Will summon the bot and play media.
 @client.command(pass_context=True)
-async def play(ctx, url):
+async def play(ctx, *, url):
     channel = ctx.message.author.voice.voice_channel
     await client.join_voice_channel(channel)
     server = ctx.message.server
@@ -53,6 +53,21 @@ async def play(ctx, url):
     player.volume = 0.15
     player.start()
     await client.say("**Playing song..**")
+
+@client.command(pass_context=True)
+async def queue(ctx, *, url):
+    server = ctx.message.server
+    voice_client = client.voice_client_in(server)
+    opts = {"default_search": "auto", "format": "bestaudio/best", "skip_download": True}
+    player = await voice_client.create_ytdl_player(url, ytdl_options=opts, after=lambda: check_queue(server.id))
+    player.volume = 0.15
+
+    if server.id in queues:
+        queues[server.id].append(player)
+    else:
+        queues[server.id] = [player]
+
+    await client.say("**Queueing video..**")
 
 @client.command(pass_context=True)
 async def resume(ctx):
@@ -77,19 +92,5 @@ async def leave(ctx):
     server = ctx.message.server
     voice_client = client.voice_client_in(server)
     await voice_client.disconnect()
-
-@client.command(pass_context=True)
-async def queue(ctx, url):
-    server = ctx.message.server
-    voice_client = client.voice_client_in(server)
-    opts = {"default_search": "auto", "format": "bestaudio/best", "skip_download": True}
-    player = await voice_client.create_ytdl_player(url, ytdl_options=opts, after=lambda: check_queue(server.id))
-
-    if server.id in queues:
-        queues[server.id].append(player)
-    else:
-        queues[server.id] = [player]
-
-    await client.say("**Queueing video..**")
 
 client.run(token)
