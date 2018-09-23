@@ -52,9 +52,7 @@ async def play(ctx, url):
     players[server.id] = player
     player.volume = 0.15
     player.start()
-    ydl.add_default_info_extractors()
-    info = ydl.extract_info(url, download=False)
-    await client.say("**Playing:** " + info["title"])
+    await client.say("**Playing song..**")
 
 @client.command(pass_context=True)
 async def resume(ctx):
@@ -84,7 +82,8 @@ async def leave(ctx):
 async def queue(ctx, url):
     server = ctx.message.server
     voice_client = client.voice_client_in(server)
-    player = await voice_client.create_ytdl_player(url, after=lambda: check_queue(server.id))
+    opts = {"default_search": "auto", "format": "bestaudio/best", "skip_download": True}
+    player = await voice_client.create_ytdl_player(url, ytdl_options=opts, after=lambda: check_queue(server.id))
 
     if server.id in queues:
         queues[server.id].append(player)
