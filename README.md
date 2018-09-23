@@ -7,8 +7,8 @@ but it will still remain a fairly simple and lightweight music bot.
 ## Commands
 | Commands          | Description           |
 | ----------------- | --------------------- |
-| !play             | [YouTube URL]         |
-| !queue            | [YouTube URL]         |
+| !play             | [YouTube URL/String]  |
+| !queue            | [YouTube URL/String]  |
 | !resume           |                       |
 | !pause            |                       |
 | !stop             |                       |
