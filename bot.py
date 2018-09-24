@@ -36,9 +36,12 @@ async def on_message(message):
 
 @client.command(pass_context=True)
 async def vol(ctx, value: int):
-    server_id = ctx.message.server.id
-    players[server_id].volume = value / 100
-    await client.say("**Volume set to:** " + str(value) + "%")
+    if value > 100:
+        await client.say("**Fuck off..**")
+    else:
+        server_id = ctx.message.server.id
+        players[server_id].volume = value / 100
+        await client.say("**Volume set to:** " + str(value) + "%")
 
 # Will summon the bot and play media.
 @client.command(pass_context=True)
@@ -52,7 +55,7 @@ async def play(ctx, *, url):
     players[server.id] = player
     player.volume = 0.15
     player.start()
-    await client.say("**Playing song..**")
+    await client.say("**Playing video..**")
 
 @client.command(pass_context=True)
 async def queue(ctx, *, url):
