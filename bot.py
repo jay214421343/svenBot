@@ -46,31 +46,28 @@ async def vol(ctx, value: int):
 # Will summon the bot and play media.
 @client.command(pass_context=True)
 async def play(ctx, *, url):
-    channel = ctx.message.author.voice.voice_channel
-    await client.join_voice_channel(channel)
     server = ctx.message.server
-    voice_client = client.voice_client_in(server)
-    opts = {"default_search": "auto", "format": "bestaudio/best", "skip_download": True}
-    player = await voice_client.create_ytdl_player(url, ytdl_options=opts, after=lambda: check_queue(server.id))
-    players[server.id] = player
-    player.volume = 0.15
-    player.start()
-    await client.say("**Playing video..**")
-
-@client.command(pass_context=True)
-async def queue(ctx, *, url):
-    server = ctx.message.server
-    voice_client = client.voice_client_in(server)
-    opts = {"default_search": "auto", "format": "bestaudio/best", "skip_download": True}
-    player = await voice_client.create_ytdl_player(url, ytdl_options=opts, after=lambda: check_queue(server.id))
-    player.volume = 0.15
-
-    if server.id in queues:
-        queues[server.id].append(player)
+    if client.is_voice_connected(server) is True:
+        server = ctx.message.server
+        voice_client = client.voice_client_in(server)
+        opts = {"default_search": "auto", "format": "bestaudio/best", "skip_download": True}
+        player = await voice_client.create_ytdl_player(url, ytdl_options=opts)
+        player.volume = 0.15
+        if server.id in queues:
+            queues[server.id].append(player)
+        else:
+            queues[server.id] = [player]
+        await client.say("**Queueing video..**")
     else:
-        queues[server.id] = [player]
-
-    await client.say("**Queueing video..**")
+        channel = ctx.message.author.voice.voice_channel
+        await client.join_voice_channel(channel)
+        voice_client = client.voice_client_in(server)
+        opts = {"default_search": "auto", "format": "bestaudio/best", "skip_download": True}
+        player = await voice_client.create_ytdl_player(url, ytdl_options=opts)
+        players[server.id] = player
+        player.volume = 0.15
+        player.start()
+        await client.say("**Playing video..**")
 
 @client.command(pass_context=True)
 async def resume(ctx):
@@ -100,6 +97,8 @@ async def leave(ctx):
 async def skip(ctx):
     server_id = ctx.message.server.id
     players[server_id].stop()
+    server = ctx.message.server
+    check_queue(server.id)
     await client.say("**Skipping video..**")
 
 client.run(token)
