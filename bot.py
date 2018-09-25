@@ -100,8 +100,6 @@ async def leave(ctx):
 async def skip(ctx):
     server_id = ctx.message.server.id
     players[server_id].stop()
-    server = ctx.message.server
-    check_queue(server.id)
     await client.say("**Skipping video..**")
 
 client.run(token)
