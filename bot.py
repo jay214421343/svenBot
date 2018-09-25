@@ -58,7 +58,7 @@ async def play(ctx, *, url):
         else:
             queues[server.id] = [player]
         await client.say("**Queueing video..**")
-    else:
+    elif client.is_voice_connected(server) is False:
         channel = ctx.message.author.voice.voice_channel
         await client.join_voice_channel(channel)
         voice_client = client.voice_client_in(server)
@@ -68,6 +68,8 @@ async def play(ctx, *, url):
         player.volume = 0.15
         player.start()
         await client.say("**Playing video..**")
+    else:
+        await client.say("**You probably didn't do that right, try again..**")
 
 @client.command(pass_context=True)
 async def resume(ctx):
