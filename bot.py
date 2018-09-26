@@ -1,6 +1,7 @@
 import discord
 import logging
 import youtube_dl
+import asyncio
 from youtube_dl import YoutubeDL
 from discord.ext import commands
 from docs.config import token
@@ -16,6 +17,17 @@ logger.addHandler(handler)
 players = {}
 queues = {}
 ydl = YoutubeDL()
+
+youtube_dl_opts = {
+    "default_search": "auto",
+    "format": "bestaudio/best",
+    "extractaudio": True,
+    "nocheckcertificate": True,
+    "ignoreerrors": True,
+    "no_warnings": True, 
+    "verbose": False,
+    "write_info_json": True
+    }
 
 def check_queue(id):
     if queues[id] != []:
@@ -50,8 +62,7 @@ async def play(ctx, *, url):
     if client.is_voice_connected(server) is True:
         server = ctx.message.server
         voice_client = client.voice_client_in(server)
-        opts = {"default_search": "auto", "format": "bestaudio/best", "skip_download": True}
-        player = await voice_client.create_ytdl_player(url, ytdl_options=opts)
+        player = await voice_client.create_ytdl_player(url, ytdl_options=youtube_dl_opts, after=lambda: check_queue(server.id))
         player.volume = 0.15
         if server.id in queues:
             queues[server.id].append(player)
@@ -62,8 +73,7 @@ async def play(ctx, *, url):
         channel = ctx.message.author.voice.voice_channel
         await client.join_voice_channel(channel)
         voice_client = client.voice_client_in(server)
-        opts = {"default_search": "auto", "format": "bestaudio/best", "skip_download": True}
-        player = await voice_client.create_ytdl_player(url, ytdl_options=opts)
+        player = await voice_client.create_ytdl_player(url, ytdl_options=youtube_dl_opts, after=lambda: check_queue(server.id))
         players[server.id] = player
         player.volume = 0.15
         player.start()
