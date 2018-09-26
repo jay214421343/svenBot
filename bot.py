@@ -24,9 +24,8 @@ youtube_dl_opts = {
     "extractaudio": True,
     "nocheckcertificate": True,
     "ignoreerrors": True,
-    "no_warnings": True, 
-    "verbose": False,
-    "write_info_json": True
+    "no_warnings": True,
+    "verbose": False
     }
 
 def check_queue(id):
