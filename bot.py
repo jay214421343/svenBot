@@ -28,11 +28,16 @@ youtube_dl_opts = {
     "verbose": False
     }
 
-def check_queue(id):
-    if queues[id] != []:
-        player = queues[id].pop(0)
-        players[id] = player
+def check_queue(id_):
+    if len(queues[id_.id]) != 0:
+        player = queues[id_.id].pop(0)
+        players[id_.id] = player
         player.start()
+    else:
+        print("Automatically disconnected, no songs in the queue.")
+        server = id_
+        voice_client = client.voice_client_in(server)
+        voice_client.loop.create_task(voice_client.disconnect())
 
 @client.event
 async def on_ready():
@@ -54,15 +59,15 @@ async def vol(ctx, value: int):
         players[server_id].volume = value / 100
         await client.say("**Volume set to:** " + str(value) + "%")
 
-# Will summon the bot and play media.
+# Will summon the bot and play or queue media.
 @client.command(pass_context=True)
 async def play(ctx, *, url):
     server = ctx.message.server
     if client.is_voice_connected(server) is True:
-        server = ctx.message.server
         voice_client = client.voice_client_in(server)
-        player = await voice_client.create_ytdl_player(url, ytdl_options=youtube_dl_opts, after=lambda: check_queue(server.id))
+        player = await voice_client.create_ytdl_player(url, ytdl_options=youtube_dl_opts, after=lambda: check_queue(server))
         player.volume = 0.15
+        players[server.id] = player
         if server.id in queues:
             queues[server.id].append(player)
         else:
@@ -72,9 +77,9 @@ async def play(ctx, *, url):
         channel = ctx.message.author.voice.voice_channel
         await client.join_voice_channel(channel)
         voice_client = client.voice_client_in(server)
-        player = await voice_client.create_ytdl_player(url, ytdl_options=youtube_dl_opts, after=lambda: check_queue(server.id))
-        players[server.id] = player
+        player = await voice_client.create_ytdl_player(url, ytdl_options=youtube_dl_opts, after=lambda: check_queue(server))
         player.volume = 0.15
+        players[server.id] = player
         player.start()
         await client.say("**Playing video..**")
     else:
