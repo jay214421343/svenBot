@@ -34,10 +34,10 @@ def check_queue(server):
         player.start()
         print("Playing queued video..")
     if not queues[server.id]:
-        print("Automatically disconnected, no songs in the queue.")
         voice_client = client.voice_client_in(server)
         voice_client.loop.create_task(voice_client.disconnect())
-        
+        print("Automatically disconnected, no songs in the queue.")
+
 @client.event
 async def on_ready():
     print("svenBot is now online.")
