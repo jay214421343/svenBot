@@ -11,8 +11,7 @@ but it will still remain a fairly simple and lightweight music bot.
 | !skip             | Skips current song                         |
 | !resume           | Resumes a paused song                      |
 | !pause            | Pauses current song                        |
-| !stop             | Stops current song                         |
-| !leave            | Leaves voice channel                       |
+| !leave            | Clears queue and leaves voice channel      |
 | !vol              | [Value between 1-100]                      |
 
 ## Acknowledged issues and bugs that I'm currently working on
