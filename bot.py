@@ -17,26 +17,30 @@ logger.addHandler(handler)
 queues = {}
 ydl = YoutubeDL()
 
-youtube_dl_opts = {
+# Option parameters for youtube_dl.
+ydl_opts = {
     "default_search": "auto",
     "format": "bestaudio/best",
-    "extractaudio": True,
+    "extractaudio": True,   
     "nocheckcertificate": True,
     "ignoreerrors": True,
     "no_warnings": True,
     "verbose": False
     }
 
+# Checks the queue for media to play.
 def check_queue(server):
     player = queues[server.id].pop(0)
     if queues[server.id]:
         player = queues[server.id][0]
         player.start()
-        print("Playing queued video..")
+        print("[Playing queued video..]")
+        client.say("**Playing queued video..**")
     if not queues[server.id]:
-        print("Automatically disconnected, no songs in the queue.")
         voice_client = client.voice_client_in(server)
         voice_client.loop.create_task(voice_client.disconnect())
+        print("[Disconnected, no songs in queue..]")
+        client.say("**No more videos in the queue, bye..**")
         
 @client.event
 async def on_ready():
@@ -70,15 +74,17 @@ async def play(ctx, *, url):
         voice_client = client.voice_client_in(server)
     else:
         await client.say("**You probably didn't do that right, try again..**")
-    player = await voice_client.create_ytdl_player(url, ytdl_options=youtube_dl_opts, after=lambda: check_queue(server))
+    player = await voice_client.create_ytdl_player(url, ytdl_options=ydl_opts, after=lambda: check_queue(server))
     player.volume = 0.15
     if server.id in queues:
         queues[server.id].append(player)
+        print("[Queued video..]")
+        await client.say("**Queuing video..**")
     else:
         queues[server.id] = [player]
         player.start()
-        print("Playing video..")
-    await client.say("**Playing video..**")
+        print("[Playing video..]")
+        await client.say("**Playing video..**")
 
 @client.command(pass_context=True)
 async def resume(ctx):
