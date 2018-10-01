@@ -14,37 +14,36 @@ handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w"
 handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
 logger.addHandler(handler)
 
-queues = {}
+queue = {}
 ydl = YoutubeDL()
 
 # Option parameters for youtube_dl.
 ydl_opts = {
     "default_search": "auto",
     "format": "bestaudio/best",
-    "extractaudio": True,   
+    "extractaudio": True,
     "nocheckcertificate": True,
     "ignoreerrors": True,
     "no_warnings": True,
-    "verbose": False
+    "verbose": False,
+    "skip_download": True
     }
 
 # Checks the queue for media to play.
 def check_queue(server):
-    player = queues[server.id].pop(0)
-    if queues[server.id]:
-        player = queues[server.id][0]
+    queue[server.id].pop(0)
+    if queue[server.id]:
+        player = queue[server.id][0]
         player.start()
-        print("[Playing queued video..]")
-        client.say("**Playing queued video..**")
-    if not queues[server.id]:
+        print("[status] Playing queued video..")
+    if not queue[server.id]:
         voice_client = client.voice_client_in(server)
         voice_client.loop.create_task(voice_client.disconnect())
-        print("[Disconnected, no songs in queue..]")
-        client.say("**No more videos in the queue, bye..**")
-        
+        print("[status] Disconnected, no songs in queue..")
+
 @client.event
 async def on_ready():
-    print("svenBot is now online.")
+    print("[status] svenBot is now online.")
 
 # Removes the commands from Discord after being executed - clearing up all the clutter.
 @client.event
@@ -52,15 +51,6 @@ async def on_message(message):
     if message.content.startswith("!"):
         await client.delete_message(message)
     await client.process_commands(message)
-
-@client.command(pass_context=True)
-async def vol(ctx, value: int):
-    if value > 100:
-        await client.say("**Fuck off..**")
-    else:
-        server = ctx.message.server
-        queues[server.id].volume = value / 100
-        await client.say("**Volume set to:** " + str(value) + "%")
 
 # Will summon the bot and play or queue media.
 @client.command(pass_context=True)
@@ -75,22 +65,32 @@ async def play(ctx, *, url):
     else:
         await client.say("**You probably didn't do that right, try again..**")
     player = await voice_client.create_ytdl_player(url, ytdl_options=ydl_opts, after=lambda: check_queue(server))
-    player.volume = 0.15
-    if server.id in queues:
-        queues[server.id].append(player)
-        print("[Queued video..]")
+    player.volume = 0.20
+    if server.id in queue:
+        queue[server.id].append(player)
+        print("[status] Queued video..")
         await client.say("**Queuing video..**")
     else:
-        queues[server.id] = [player]
+        queue[server.id] = [player]
         player.start()
-        print("[Playing video..]")
+        print("[status] Playing video..")
         await client.say("**Playing video..**")
+
+@client.command(pass_context=True)
+async def vol(ctx, value: int):
+    server = ctx.message.server
+    if value > 100:
+        await client.say("**Fuck off..**")
+    else:
+        server = ctx.message.server
+        queue[server.id][0].volume = value / 100
+        await client.say("**Volume set to:** " + str(value) + "%")
 
 @client.command(pass_context=True)
 async def resume(ctx):
     server = ctx.message.server
-    if queues[server.id]:
-        queues[server.id][0].resume()
+    if queue[server.id]:
+        queue[server.id][0].resume()
         await client.say("**Resuming video..**")
     else:
         await client.say("**There's nothing to resume..**")
@@ -98,33 +98,27 @@ async def resume(ctx):
 @client.command(pass_context=True)
 async def pause(ctx):
     server = ctx.message.server
-    if queues[server.id]:
-        queues[server.id][0].pause()
+    if queue[server.id]:
+        queue[server.id][0].pause()
         await client.say("**Pausing video..**")
     else:
         await client.say("**There's nothing to pause..**")
-
-@client.command(pass_context=True)
-async def stop(ctx):
-    server = ctx.message.server
-    if queues[server.id]:
-        queues[server.id][0].stop()
-        await client.say("**Stopping video..**")
-    else:
-        await client.say("**There's nothing to stop..**")
 
 @client.command(pass_context=True)
 async def leave(ctx):
     server = ctx.message.server
     voice_client = client.voice_client_in(server)
     await voice_client.disconnect()
-    queues[server.id] = []
+    queue[server.id].clear()
 
 @client.command(pass_context=True)
 async def skip(ctx):
     server = ctx.message.server
-    queues[server.id][0].stop()
-    check_queue(server.id)
-    await client.say("**Skipping video..**")
+    if queue[server.id]:
+        queue[server.id][0].stop()
+        check_queue(server)
+        await client.say("**Skipping video..**")
+    else:
+        await client.say("**There's nothing to skip..**")
 
 client.run(token)
