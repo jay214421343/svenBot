@@ -31,7 +31,6 @@ ydl_opts = {
 
 # Checks the queue for media to play.
 def check_queue(server):
-    queue[0].stop()
     queue.pop(0)
     if queue:
         player = queue[0]
@@ -113,10 +112,10 @@ async def leave(ctx):
 async def skip(ctx):
     server = ctx.message.server
     if queue:
-        queue[0].stop()
+        queue[0].pause()
         check_queue(server)
         await client.say("**Skipping video..**")
     else:
         await client.say("**There's nothing to skip..**")
-        
+
 client.run(token)
