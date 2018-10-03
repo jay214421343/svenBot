@@ -26,9 +26,9 @@ ydl_opts = {
     "ignoreerrors": True,
     "no_warnings": True,
     "verbose": False,
+    "quiet": True,
     "forcetitle": True,
     "forceurl": True,
-    "quiet": True,
     "skip_download": True
     }
 
@@ -74,7 +74,7 @@ async def play(ctx, *, url):
     else:
         await client.say("**You probably didn't do that right, try again..**")
     player = await voice_client.create_ytdl_player(url, ytdl_options=ydl_opts, after=lambda: check_queue(server))
-    player.volume = 0.20
+    player.volume = 0.15
     if queue:
         queue.append(player)
         queue_names.append(player.title)
@@ -126,6 +126,7 @@ async def leave(ctx):
     queue.clear()
     queue_names.clear()
     await voice_client.disconnect()
+    print("[status] Cleared queues and disconnected, by user..")
 
 @client.command(pass_context=True)
 async def skip(ctx):
