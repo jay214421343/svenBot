@@ -89,8 +89,8 @@ async def play(ctx, *, url):
 
 @client.command(pass_context=True)
 async def queue(ctx):
+    await client.say("__**CURRENT QUEUE:**__")
     for number, song in enumerate(song_name, 1):
-        await client.say("__**CURRENT QUEUE:**__")
         await client.say("%d: %s" % (number, song))
 
 @client.command(pass_context=True)
