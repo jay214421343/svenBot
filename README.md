@@ -12,6 +12,7 @@ but it will still remain a fairly simple and lightweight music bot.
 | !resume           | Resumes a paused song                      |
 | !pause            | Pauses current song                        |
 | !leave            | Clears queue and leaves voice channel      |
+| !queue            | Prints out the current queue of songs      |
 | !vol              | [Value between 1-100]                      |
 
 ## Acknowledged issues and bugs that I'm currently working on
