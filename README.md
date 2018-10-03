@@ -19,4 +19,6 @@ but it will still remain a fairly simple and lightweight music bot.
 - [x] Being able to skip a song using !skip
 - [x] Being able to queue properly with !play (replacing !queue)
 - [x] Bot to leave voice channel if nothing is playing
-- [ ] Extract video information when using search string and not URL
+- [x] Extract video information when using search string and not URL
+
+Now that I've met the goals I wanted, I want to optimize and clean up the code as much as possible before I start working on new features.
