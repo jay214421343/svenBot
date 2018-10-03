@@ -15,7 +15,7 @@ handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(me
 logger.addHandler(handler)
 
 queue = []
-ydl = YoutubeDL()
+queue_names = []
 
 # Option parameters for youtube_dl.
 ydl_opts = {
@@ -28,22 +28,11 @@ ydl_opts = {
     "verbose": False,
     "forcetitle": True,
     "forceurl": True,
+    "quiet": True,
     "skip_download": True
     }
 
-# Checks the queue for media to play.
-def check_queue(server):
-    queue.pop(0)
-    if queue:
-        player = queue[0]
-        player.start()
-        client.loop.create_task(client.say("**Playing queued video..**"))
-        print("[status] Playing queued video..")
-    if not queue:
-        queue.clear()
-        voice_client = client.voice_client_in(server)
-        voice_client.loop.create_task(voice_client.disconnect())
-        print("[status] Disconnected, no songs in queue..")
+ydl = YoutubeDL()
 
 @client.event
 async def on_ready():
@@ -55,6 +44,22 @@ async def on_message(message):
     if message.content.startswith("!"):
         await client.delete_message(message)
     await client.process_commands(message)
+
+# Checks the queue for media to play.
+def check_queue(server):
+    queue.pop(0)
+    queue_names.pop(0)
+    if queue:
+        player = queue[0]
+        player.start()
+        client.loop.create_task(client.say("**Playing queued video:** " + queue_names[0]))
+        print("[status] Playing queued video: " + queue_names[0])
+    if not queue:
+        queue.clear()
+        queue_names.clear()
+        voice_client = client.voice_client_in(server)
+        voice_client.loop.create_task(voice_client.disconnect())
+        print("[status] Disconnected, no songs in queue..")
 
 # Will summon the bot and play or queue media.
 @client.command(pass_context=True)
@@ -72,13 +77,23 @@ async def play(ctx, *, url):
     player.volume = 0.20
     if queue:
         queue.append(player)
-        print("[status] Queuing video..")
+        queue_names.append(player.title)
+        print("[status] Queuing video: " + player.title)
         await client.say("**Queuing video..**")
     else:
         queue.append(player)
+        queue_names.append(player.title)
         player.start()
-        print("[status] Playing video..")
-        await client.say("**Playing video..**")
+        print("[status] Playing: " + player.title)
+        await client.say("**Playing:** " + player.title)
+
+@client.command(pass_context=True)
+async def songs(ctx):
+    display_queue_names = "\n".join(queue_names)
+    if queue_names:
+        await client.say("**Current queue:**" + "\n" + display_queue_names)
+    else:
+        await client.say("**No songs in the queue..**")
 
 @client.command(pass_context=True)
 async def vol(ctx, value: int):
@@ -109,6 +124,7 @@ async def leave(ctx):
     server = ctx.message.server
     voice_client = client.voice_client_in(server)
     queue.clear()
+    queue_names.clear()
     await voice_client.disconnect()
 
 @client.command(pass_context=True)
