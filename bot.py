@@ -49,20 +49,6 @@ async def on_message(message):
         await client.delete_message(message)
     await client.process_commands(message)
 
-@client.command(pass_context=True)
-async def help(ctx):
-    help_list = [
-        "__**Available commands for svenBot**__",
-        "**!play:** Plays/queues video, use URL or search string",
-        "**!skip:** Skips current song",
-        "**!resume:** Resumes a paused song",
-        "**!pause:** Pauses current song",
-        "**!leave:** Clears queue and leaves voice channel",
-        "**!queue:** Prints out the current queue of songs",
-        "**!vol:** Adjust volume using value between 1-100"
-    ]
-    await client.say("\n".join(help_list))
-
 # Checks the queue for media to play.
 def check_queue(ctx):
     server = ctx.message.server
@@ -160,5 +146,19 @@ async def skip(ctx):
         await client.say("**Skipping video..**")
     else:
         await client.say("**There's nothing to skip..**")
+
+@client.command(pass_context=True)
+async def help(ctx):
+    help_list = [
+        "__**Available commands for svenBot**__",
+        "**!play:** Plays/queues video, use URL or search string",
+        "**!skip:** Skips current song",
+        "**!resume:** Resumes a paused song",
+        "**!pause:** Pauses current song",
+        "**!leave:** Clears queue and leaves voice channel",
+        "**!queue:** Prints out the current queue of songs",
+        "**!vol:** Adjust volume using value between 1-100"
+    ]
+    await client.say("\n".join(help_list))
 
 client.run(token)
