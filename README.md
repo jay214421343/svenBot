@@ -14,6 +14,7 @@ but it will still remain a fairly simple and lightweight music bot.
 | !leave            | Clears queue and leaves voice channel      |
 | !queue            | Prints out the current queue of songs      |
 | !vol              | [Value between 1-100]                      |
+| !help             | Displays all the bot features              |
 
 ## Acknowledged issues and bugs that I'm currently working on
 - [x] Volume control and adding a volume value limitation
