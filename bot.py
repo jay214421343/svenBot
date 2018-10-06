@@ -16,6 +16,7 @@ logger.addHandler(handler)
 
 song_queue = []
 song_name = []
+song_volume = []
 
 # Option parameters for youtube_dl.
 ydl_opts = {
@@ -46,17 +47,20 @@ async def on_message(message):
     await client.process_commands(message)
 
 # Checks the queue for media to play.
-def check_queue(server):
+def check_queue(ctx):
+    server = ctx.message.server
     song_queue.pop(0)
     song_name.pop(0)
     if song_queue:
-        player = song_queue[0]
-        player.start()
+        if song_volume:
+            song_queue[0].volume = song_volume[0]
+        song_queue[0].start()
         client.loop.create_task(client.say("**Playing queued video:** " + song_name[0]))
         print("[status] Playing queued video: " + song_name[0])
     if not song_queue:
         song_queue.clear()
         song_name.clear()
+        song_volume.clear()
         voice_client = client.voice_client_in(server)
         voice_client.loop.create_task(voice_client.disconnect())
         print("[status] Disconnected, no songs in queue..")
@@ -73,8 +77,8 @@ async def play(ctx, *, url):
         voice_client = client.voice_client_in(server)
     else:
         await client.say("**You probably didn't do that right, try again..**")
-    player = await voice_client.create_ytdl_player(url, ytdl_options=ydl_opts, after=lambda: check_queue(server))
-    player.volume = 0.15
+    player = await voice_client.create_ytdl_player(url, ytdl_options=ydl_opts, after=lambda: check_queue(ctx))
+    player.volume = 0.10
     if song_queue:
         song_queue.append(player)
         song_name.append(player.title)
@@ -98,7 +102,9 @@ async def vol(ctx, value: int):
     if value > 100:
         await client.say("**Fuck off..**")
     else:
+        song_volume.clear()
         song_queue[0].volume = value / 100
+        song_volume.append(song_queue[0].volume)
         await client.say("**Volume set to:** " + str(value) + "%")
 
 @client.command(pass_context=True)
@@ -124,14 +130,13 @@ async def leave(ctx):
     song_queue.clear()
     song_name.clear()
     await voice_client.disconnect()
-    print("[status] Cleared queue and disconnected manually, by user..")
+    print("[status] Cleared queue and disconnected..")
 
 @client.command(pass_context=True)
 async def skip(ctx):
-    server = ctx.message.server
     if song_queue:
         song_queue[0].pause()
-        check_queue(server)
+        check_queue(ctx)
         await client.say("**Skipping video..**")
     else:
         await client.say("**There's nothing to skip..**")
