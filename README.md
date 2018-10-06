@@ -5,16 +5,16 @@ It is currently under heavy development, many features still to be added,
 but it will still remain a fairly simple and lightweight music bot.
 
 ## Commands
-| Commands          | Description                                |
-| ----------------- | ------------------------------------------ |
-| !play             | [YouTube URL/String] (also works as queue) |
-| !skip             | Skips current song                         |
-| !resume           | Resumes a paused song                      |
-| !pause            | Pauses current song                        |
-| !leave            | Clears queue and leaves voice channel      |
-| !queue            | Prints out the current queue of songs      |
-| !vol              | [Value between 1-100]                      |
-| !help             | Displays all the bot features              |
+| Commands          | Description                                  |
+| ----------------- | -------------------------------------------- |
+| !play             | Plays/queues video, use URL or search string |
+| !skip             | Skips current song                           |
+| !resume           | Resumes a paused song                        |
+| !pause            | Pauses current song                          |
+| !leave            | Clears queue and leaves voice channel        |
+| !queue            | Prints out the current queue of songs        |
+| !vol              | Adjust volume using value between 1-100      |
+| !help             | Displays all the bot features                |
 
 ## Acknowledged issues and bugs that I'm currently working on
 - [x] Volume control and adding a volume value limitation
