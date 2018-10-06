@@ -7,6 +7,7 @@ from discord.ext import commands
 from docs.config import token
 
 client = commands.Bot(command_prefix = "!")
+client.remove_command("help")
 
 logger = logging.getLogger("discord")
 logger.setLevel(logging.DEBUG)
@@ -48,6 +49,20 @@ async def on_message(message):
         await client.delete_message(message)
     await client.process_commands(message)
 
+@client.command(pass_context=True)
+async def help(ctx):
+    help_list = [
+        "__**Available commands for svenBot**__",
+        "**!play:** Plays/queues video, use URL or search string",
+        "**!skip:** Skips current song",
+        "**!resume:** Resumes a paused song",
+        "**!pause:** Pauses current song",
+        "**!leave:** Clears queue and leaves voice channel",
+        "**!queue:** Prints out the current queue of songs",
+        "**!vol:** Adjust volume using value between 1-100"
+    ]
+    await client.say("\n".join(help_list))
+
 # Checks the queue for media to play.
 def check_queue(ctx):
     server = ctx.message.server
@@ -57,8 +72,8 @@ def check_queue(ctx):
         if song_volume:
             song_queue[0].volume = song_volume[0]
         song_queue[0].start()
-        client.loop.create_task(client.say("**Playing queued video:** " + song_name[0]))
-        print("[status] Playing queued video: " + song_name[0])
+        client.loop.create_task(client.say(f"**Playing queued video:** {song_name[0]}"))
+        print(f"[status] Playing queued video: {song_name[0]}")
     if not song_queue:
         song_queue.clear()
         song_name.clear()
@@ -87,14 +102,14 @@ async def play(ctx, *, url):
         if song_queue:
             song_queue.append(player)
             song_name.append(player.title)
-            print("[status] Queuing video: " + player.title)
+            print(f"[status] Queuing: {player.title}")
             await client.say("**Queuing video..**")
         else:
             song_queue.append(player)
             song_name.append(player.title)
             player.start()
-            print("[status] Playing: " + player.title)
-            await client.say("**Playing:** " + player.title)
+            print(f"[status] Playing: {player.title}")
+            await client.say(f"**Playing:** {player.title}")
 
 @client.command(pass_context=True)
 async def queue(ctx):
@@ -110,7 +125,7 @@ async def vol(ctx, value: int):
         song_volume.clear()
         song_queue[0].volume = value / 100
         song_volume.append(song_queue[0].volume)
-        await client.say("**Volume set to:** " + str(value) + "%")
+        await client.say(f"**Volume set to:** {song_volume[0]}%")
 
 @client.command(pass_context=True)
 async def resume(ctx):
