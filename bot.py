@@ -22,6 +22,7 @@ song_volume = []
 ydl_opts = {
     "default_search": "auto",
     "format": "bestaudio/best",
+    "postprocessors": [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}, {'key': 'FFmpegMetadata'}],
     "extractaudio": True,
     "nocheckcertificate": True,
     "ignoreerrors": True,
@@ -30,7 +31,8 @@ ydl_opts = {
     "quiet": True,
     "forcetitle": True,
     "forceurl": True,
-    "skip_download": True
+    "skip_download": True,
+    "noplaylist": True
     }
 
 ydl = YoutubeDL()
@@ -69,27 +71,30 @@ def check_queue(ctx):
 @client.command(pass_context=True)
 async def play(ctx, *, url):
     server = ctx.message.server
-    if client.is_voice_connected(server):
-        voice_client = client.voice_client_in(server)
-    elif not client.is_voice_connected(server):
-        channel = ctx.message.author.voice.voice_channel
-        await client.join_voice_channel(channel)
-        voice_client = client.voice_client_in(server)
+    if "/playlist" in url:
+        await client.say("You can't queue playlists..")
     else:
-        await client.say("**You probably didn't do that right, try again..**")
-    player = await voice_client.create_ytdl_player(url, ytdl_options=ydl_opts, after=lambda: check_queue(ctx))
-    player.volume = 0.10
-    if song_queue:
-        song_queue.append(player)
-        song_name.append(player.title)
-        print("[status] Queuing video: " + player.title)
-        await client.say("**Queuing video..**")
-    else:
-        song_queue.append(player)
-        song_name.append(player.title)
-        player.start()
-        print("[status] Playing: " + player.title)
-        await client.say("**Playing:** " + player.title)
+        if client.is_voice_connected(server):
+            voice_client = client.voice_client_in(server)
+        elif not client.is_voice_connected(server):
+            channel = ctx.message.author.voice.voice_channel
+            await client.join_voice_channel(channel)
+            voice_client = client.voice_client_in(server)
+        else:
+            await client.say("**You probably didn't do that right, try again..**")
+        player = await voice_client.create_ytdl_player(url, ytdl_options=ydl_opts, after=lambda: check_queue(ctx))
+        player.volume = 0.10
+        if song_queue:
+            song_queue.append(player)
+            song_name.append(player.title)
+            print("[status] Queuing video: " + player.title)
+            await client.say("**Queuing video..**")
+        else:
+            song_queue.append(player)
+            song_name.append(player.title)
+            player.start()
+            print("[status] Playing: " + player.title)
+            await client.say("**Playing:** " + player.title)
 
 @client.command(pass_context=True)
 async def queue(ctx):
