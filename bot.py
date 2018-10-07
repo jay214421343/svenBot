@@ -1,7 +1,6 @@
 import discord
 import logging
 import youtube_dl
-import asyncio
 from youtube_dl import YoutubeDL
 from discord.ext import commands
 from docs.config import token
@@ -111,7 +110,7 @@ async def vol(ctx, value: int):
         song_volume.clear()
         song_queue[0].volume = value / 100
         song_volume.append(song_queue[0].volume)
-        await client.say(f"**Volume set to:** {song_volume[0]}%")
+        await client.say(f"**Volume set to:** {str(value)}%")
 
 @client.command(pass_context=True)
 async def resume(ctx):
