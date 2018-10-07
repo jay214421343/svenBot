@@ -59,7 +59,7 @@ def check_queue(ctx):
         song_queue[0].start()
         client.loop.create_task(client.say(f"**Playing queued video:** {song_name[0]}"))
         print(f"[status] Playing queued video: {song_name[0]}")
-    if not song_queue:
+    elif not song_queue:
         song_queue.clear()
         song_name.clear()
         song_volume.clear()
@@ -80,8 +80,6 @@ async def play(ctx, *, url):
             channel = ctx.message.author.voice.voice_channel
             await client.join_voice_channel(channel)
             voice_client = client.voice_client_in(server)
-        else:
-            await client.say("**You probably didn't do that right, try again..**")
         player = await voice_client.create_ytdl_player(url, ytdl_options=ydl_opts, after=lambda: check_queue(ctx))
         player.volume = 0.10
         if song_queue:
@@ -89,7 +87,7 @@ async def play(ctx, *, url):
             song_name.append(player.title)
             print(f"[status] Queuing: {player.title}")
             await client.say("**Queuing video..**")
-        else:
+        elif not song_queue:
             song_queue.append(player)
             song_name.append(player.title)
             player.start()
@@ -104,20 +102,23 @@ async def queue(ctx):
 
 @client.command(pass_context=True)
 async def vol(ctx, value: int):
-    if value > 100:
-        await client.say("**Fuck off..**")
-    else:
-        song_volume.clear()
-        song_queue[0].volume = value / 100
-        song_volume.append(song_queue[0].volume)
-        await client.say(f"**Volume set to:** {str(value)}%")
+    if song_queue:
+        if value > 100:
+            await client.say("**Can't go higher than 100% volume..**")
+        else:
+            song_volume.clear()
+            song_queue[0].volume = value / 100
+            song_volume.append(song_queue[0].volume)
+            await client.say(f"**Volume set to:** {str(value)}%")
+    elif not song_queue:
+        await client.say("**There's nothing playing, can't adjust volume..**")
 
 @client.command(pass_context=True)
 async def resume(ctx):
     if song_queue:
         song_queue[0].resume()
         await client.say("**Resuming video..**")
-    else:
+    elif not song_queue:
         await client.say("**There's nothing to resume..**")
 
 @client.command(pass_context=True)
@@ -125,17 +126,20 @@ async def pause(ctx):
     if song_queue:
         song_queue[0].pause()
         await client.say("**Pausing video..**")
-    else:
+    elif not song_queue:
         await client.say("**There's nothing to pause..**")
 
 @client.command(pass_context=True)
 async def leave(ctx):
     server = ctx.message.server
-    voice_client = client.voice_client_in(server)
-    song_queue.clear()
-    song_name.clear()
-    await voice_client.disconnect()
-    print("[status] Cleared queue and disconnected..")
+    if client.voice_client_in(server):
+        voice_client = client.voice_client_in(server)
+        song_queue.clear()
+        song_name.clear()
+        await voice_client.disconnect()
+        print("[status] Cleared queue and disconnected..")
+    elif not client.voice_client_in(server):
+        await client.say("**Can't leave if I'm not in a voice channel..**")
 
 @client.command(pass_context=True)
 async def skip(ctx):
@@ -143,7 +147,7 @@ async def skip(ctx):
         song_queue[0].pause()
         check_queue(ctx)
         await client.say("**Skipping video..**")
-    else:
+    elif not song_queue:
         await client.say("**There's nothing to skip..**")
 
 @client.command(pass_context=True)
