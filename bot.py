@@ -50,16 +50,16 @@ async def on_message(message):
 
 # Checks the queue for media to play.
 def check_queue(ctx):
-    server = ctx.message.server
     song_queue.pop(0)
     song_name.pop(0)
     if song_queue:
         if song_volume:
             song_queue[0].volume = song_volume[0]
-        song_queue[0].start()
-        client.loop.create_task(client.say(f"**Playing queued video:** {song_name[0]}"))
+        client.loop.create_task(client.send_message(ctx.message.channel, f"**Playing queued video:** {song_name[0]}"))
         print(f"[status] Playing queued video: {song_name[0]}")
+        song_queue[0].start()
     elif not song_queue:
+        server = ctx.message.server
         song_queue.clear()
         song_name.clear()
         song_volume.clear()
