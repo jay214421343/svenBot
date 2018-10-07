@@ -15,13 +15,3 @@ but it will still remain a fairly simple and lightweight music bot.
 | !queue            | Prints out the current queue of songs        |
 | !vol              | Adjust volume using value between 1-100      |
 | !help             | Displays all the bot features                |
-
-## Acknowledged issues and bugs that I'm currently working on
-- [x] Volume control and adding a volume value limitation
-- [x] Being able to skip a song using !skip
-- [x] Being able to queue properly with !play (replacing !queue)
-- [x] Bot to leave voice channel if nothing is playing
-- [x] Extract video information when using search string and not URL
-- [ ] Display "Playing queued video <song_name>" properly (only working when using the skip function)
-
-Now that I've met the goals I wanted, I want to optimize and clean up the code as much as possible before I start working on new features.
