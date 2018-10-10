@@ -1,39 +1,25 @@
 import discord
 import logging
 import youtube_dl
+from weather import Weather, Unit
 from youtube_dl import YoutubeDL
 from discord.ext import commands
-from docs.config import token
-
-client = commands.Bot(command_prefix = "!")
-client.remove_command("help")
+from docs.config import token, ydl_opts
 
 logger = logging.getLogger("discord")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
 handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
 logger.addHandler(handler)
 
+client = commands.Bot(command_prefix = "!")
+client.remove_command("help")
+
+weather_unit = Weather(unit=Unit.CELSIUS)
+
 song_queue = []
 song_name = []
 song_volume = []
-
-# Option parameters for youtube_dl.
-ydl_opts = {
-    "default_search": "auto",
-    "format": "bestaudio/best",
-    "postprocessors": [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}, {'key': 'FFmpegMetadata'}],
-    "extractaudio": True,
-    "nocheckcertificate": True,
-    "ignoreerrors": True,
-    "no_warnings": True,
-    "verbose": False,
-    "quiet": True,
-    "forcetitle": True,
-    "forceurl": True,
-    "skip_download": True,
-    "noplaylist": True
-    }
 
 ydl = YoutubeDL()
 
@@ -151,6 +137,20 @@ async def skip(ctx):
         await client.say("**There's nothing to skip..**")
 
 @client.command(pass_context=True)
+async def weather(ctx, *, place):
+    location = weather_unit.lookup_by_location(place)
+    condition = location.condition
+    await client.say(f"**Current weather in {place}:** {condition.temp}°C and {condition.text}..")
+
+@client.command(pass_context=True)
+async def forecast(ctx, *, place):
+    location = weather_unit.lookup_by_location(place)
+    forecasts = location.forecast
+    await client.say(f"**Forecast for {place}:** ")
+    for forecast in forecasts:
+        await client.say(f"**{forecast.day}:** {forecast.text}, with a high of {forecast.high}°C and a low of {forecast.low}°C..")
+
+@client.command(pass_context=True)
 async def help(ctx):
     help_list = [
         "__**Available commands for svenBot**__",
@@ -160,7 +160,9 @@ async def help(ctx):
         "**!pause:** Pauses current song",
         "**!leave:** Clears queue and leaves voice channel",
         "**!queue:** Prints out the current queue of songs",
-        "**!vol:** Adjust volume using value between 1-100"
+        "**!vol:** Adjust volume using value between 1-100",
+        "**!weather:** Input a city name to get weather info",
+        "**!forecast:** Input a city name to get forecast info"
     ]
     await client.say("\n".join(help_list))
 
