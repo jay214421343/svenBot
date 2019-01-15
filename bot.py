@@ -1,7 +1,7 @@
 import discord
 import logging
 import youtube_dl
-import docs.config
+import config
 from weather import Weather, Unit
 from youtube_dl import YoutubeDL
 from discord.ext import commands
@@ -59,7 +59,7 @@ async def play(ctx, *, url):
             channel = ctx.message.author.voice.voice_channel
             await client.join_voice_channel(channel)
             voice_client = client.voice_client_in(server)
-        player = await voice_client.create_ytdl_player(url, ytdl_options=docs.config.ydl_opts, after=lambda: check_queue(ctx), before_options=docs.config.before_args)
+        player = await voice_client.create_ytdl_player(url, ytdl_options=config.ydl_opts, after=lambda: check_queue(ctx), before_options=config.before_args)
         player.volume = 0.10
         if song_queue:
             song_queue.append(player)
@@ -181,4 +181,4 @@ async def help(ctx):
     ]
     await client.say("\n".join(help_list))
 
-client.run(docs.config.token)
+client.run(config.token)

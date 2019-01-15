@@ -1,5 +1,5 @@
 # Discord bot token
-token = "DISCORD BOT TOKEN HERE"
+token = "INSERT BOT TOKEN HERE"
 
 # Added options for the YouTube Donwloader, telling it how to handle the downloaded/streamed media
 ydl_opts = {
