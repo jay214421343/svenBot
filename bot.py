@@ -1,10 +1,11 @@
 import discord
 import logging
 import youtube_dl
+import docs.config
+import asyncio
 from weather import Weather, Unit
 from youtube_dl import YoutubeDL
 from discord.ext import commands
-from docs.config import token, ydl_opts
 
 logger = logging.getLogger("discord")
 logger.setLevel(logging.WARNING)
@@ -23,6 +24,7 @@ song_volume = []
 
 ydl = YoutubeDL()
 
+# Initializes bot and prints out if the bot is ready/online
 @client.event
 async def on_ready():
     print("[status] svenBot is now online.")
@@ -66,7 +68,7 @@ async def play(ctx, *, url):
             channel = ctx.message.author.voice.voice_channel
             await client.join_voice_channel(channel)
             voice_client = client.voice_client_in(server)
-        player = await voice_client.create_ytdl_player(url, ytdl_options=ydl_opts, after=lambda: check_queue(ctx))
+        player = await voice_client.create_ytdl_player(url, ytdl_options=docs.config.ydl_opts, after=lambda: check_queue(ctx), before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5")
         player.volume = 0.10
         if song_queue:
             song_queue.append(player)
@@ -77,15 +79,18 @@ async def play(ctx, *, url):
             song_queue.append(player)
             song_name.append(player.title)
             player.start()
+            song_volume.append(song_queue[0].volume)
             print(f"[status] Playing: {player.title}")
             await client.say(f"**Playing:** {player.title}")
 
+# Outputs the current queue
 @client.command(pass_context=True)
 async def queue(ctx):
     await client.say("__**CURRENT QUEUE:**__")
     for number, song in enumerate(song_name, 1):
         await client.say("%d: %s" % (number, song))
 
+# Volume control
 @client.command(pass_context=True)
 async def vol(ctx, value: int):
     if song_queue:
@@ -99,6 +104,15 @@ async def vol(ctx, value: int):
     elif not song_queue:
         await client.say("**There's nothing playing, can't adjust volume..**")
 
+# Display current volume
+@client.command(pass_context=True)
+async def currentvol(ctx):
+    if song_queue:
+        await client.say(f"**Current volume:** {str(int(song_volume[0] * 100))}%")
+    elif not song_queue:
+        await client.say("**There's nothing playing, no current volume..**")
+
+# Resumes paused player
 @client.command(pass_context=True)
 async def resume(ctx):
     if song_queue:
@@ -107,6 +121,7 @@ async def resume(ctx):
     elif not song_queue:
         await client.say("**There's nothing to resume..**")
 
+# Pauses player
 @client.command(pass_context=True)
 async def pause(ctx):
     if song_queue:
@@ -115,6 +130,7 @@ async def pause(ctx):
     elif not song_queue:
         await client.say("**There's nothing to pause..**")
 
+# Makes bot leave the current voice channel
 @client.command(pass_context=True)
 async def leave(ctx):
     server = ctx.message.server
@@ -122,11 +138,13 @@ async def leave(ctx):
         voice_client = client.voice_client_in(server)
         song_queue.clear()
         song_name.clear()
+        song_volume.clear()
         await voice_client.disconnect()
         print("[status] Cleared queue and disconnected..")
     elif not client.voice_client_in(server):
         await client.say("**Can't leave if I'm not in a voice channel..**")
 
+# Skips current song to the next song in queue
 @client.command(pass_context=True)
 async def skip(ctx):
     if song_queue:
@@ -136,12 +154,14 @@ async def skip(ctx):
     elif not song_queue:
         await client.say("**There's nothing to skip..**")
 
+# Outputs current weather in given area
 @client.command(pass_context=True)
 async def weather(ctx, *, place):
     location = weather_unit.lookup_by_location(place)
     condition = location.condition
     await client.say(f"**Current weather in {place}:** {condition.temp}°C and {condition.text}..")
 
+# Outputs a two week forecast in given area
 @client.command(pass_context=True)
 async def forecast(ctx, *, place):
     location = weather_unit.lookup_by_location(place)
@@ -150,6 +170,7 @@ async def forecast(ctx, *, place):
     for forecast in forecasts:
         await client.say(f"**{forecast.day}:** {forecast.text}, with a high of {forecast.high}°C and a low of {forecast.low}°C..")
 
+# Outputs a list of available bot commands
 @client.command(pass_context=True)
 async def help(ctx):
     help_list = [
@@ -166,4 +187,4 @@ async def help(ctx):
     ]
     await client.say("\n".join(help_list))
 
-client.run(token)
+client.run(docs.config.token)
