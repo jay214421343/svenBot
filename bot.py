@@ -182,6 +182,7 @@ async def help(ctx):
         "**!leave:** Clears queue and leaves voice channel",
         "**!queue:** Prints out the current queue of songs",
         "**!vol:** Adjust volume using value between 1-100",
+        "**!currentvol:** Displays current volume",
         "**!weather:** Input a city name to get weather info",
         "**!forecast:** Input a city name to get forecast info"
     ]
