@@ -1,6 +1,5 @@
 import discord
 import logging
-import youtube_dl
 import config
 from weather import Weather, Unit
 from youtube_dl import YoutubeDL
