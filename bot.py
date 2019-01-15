@@ -2,27 +2,18 @@ import discord
 import logging
 import youtube_dl
 import docs.config
-import asyncio
 from weather import Weather, Unit
 from youtube_dl import YoutubeDL
 from discord.ext import commands
 
-logger = logging.getLogger("discord")
-logger.setLevel(logging.WARNING)
-handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
-handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
-logger.addHandler(handler)
+logging.basicConfig(level=logging.DEBUG)
 
 client = commands.Bot(command_prefix = "!")
 client.remove_command("help")
 
-weather_unit = Weather(unit=Unit.CELSIUS)
-
 song_queue = []
 song_name = []
 song_volume = []
-
-ydl = YoutubeDL()
 
 # Initializes bot and prints out if the bot is ready/online
 @client.event
@@ -157,6 +148,7 @@ async def skip(ctx):
 # Outputs current weather in given area
 @client.command(pass_context=True)
 async def weather(ctx, *, place):
+    weather_unit = Weather(unit=Unit.CELSIUS)
     location = weather_unit.lookup_by_location(place)
     condition = location.condition
     await client.say(f"**Current weather in {place}:** {condition.temp}°C and {condition.text}..")
@@ -164,6 +156,7 @@ async def weather(ctx, *, place):
 # Outputs a two week forecast in given area
 @client.command(pass_context=True)
 async def forecast(ctx, *, place):
+    weather_unit = Weather(unit=Unit.CELSIUS)
     location = weather_unit.lookup_by_location(place)
     forecasts = location.forecast
     await client.say(f"**Forecast for {place}:** ")
