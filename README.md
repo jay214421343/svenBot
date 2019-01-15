@@ -14,7 +14,7 @@ but it will still remain a fairly simple and lightweight music bot.
 | !leave            | Clears queue and leaves voice channel         |
 | !queue            | Prints out the current queue of songs         |
 | !vol              | Adjust volume using value between 1-100       |
-| !current vol      | Displays current volume                       |
+| !currentvol       | Displays current volume                       |
 | !weather          | Checks the current weather for given location |
 | !forecast         | Checks the forecast for the coming two weeks  |
 | !help             | Displays all the bot features                 |
