@@ -81,20 +81,23 @@ async def queue(ctx):
     for number, song in enumerate(song_name, 1):
         await client.say(f"{number}: {song}")
 
-# Volume control.
+# Volume control
 @client.command(pass_context=True)
-async def vol(ctx, value: int):
+async def vol(ctx, *args):
     if song_queue:
-        if value > 100:
+        if not args:
+            await client.say(f"**Current volume:** {int(song_volume[0] * 100)}%")
+        elif int(args[0]) > 100:
             await client.say("**Can't go higher than 100% volume**")
-        else:
+        elif int(args[0]) <= 100:
             song_volume.clear()
-            song_queue[0].volume = value / 100
+            song_queue[0].volume = int(args[0]) / 100
             song_volume.append(song_queue[0].volume)
-            await client.say(f"**Volume set to:** {str(value)}%")
+            await client.say(f"**Volume set to:** {str(args[0])}%")
     else:
         await client.say(f"**There's nothing playing, can't adjust volume**")
 
+# Resumes paused player.
 @client.command(pass_context=True)
 async def resume(ctx):
     if song_queue:
