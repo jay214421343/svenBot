@@ -44,13 +44,13 @@ def check_queue(ctx):
         song_volume.clear()
         voice_client = client.voice_client_in(server)
         voice_client.loop.create_task(voice_client.disconnect())
-        print(f"[status] Disconnected, no songs in queue..")
+        print(f"[status] Disconnected, no songs in queue")
 
 # Will summon the bot and play or queue media.
 @client.command(pass_context=True)
 async def play(ctx, *, url):
     if "/playlist" in url:
-        await client.say(f"You can't queue playlists..")
+        await client.say(f"You can't queue playlists")
     else:
         server = ctx.message.server
         if client.is_voice_connected(server):
@@ -65,7 +65,7 @@ async def play(ctx, *, url):
             song_queue.append(player)
             song_name.append(player.title)
             print(f"[status] Queuing: {player.title}")
-            await client.say(f"**Queuing video..**")
+            await client.say(f"**Queuing video**")
         else:
             song_queue.append(player)
             song_name.append(player.title)
@@ -77,7 +77,7 @@ async def play(ctx, *, url):
 # Outputs the current queue.
 @client.command(pass_context=True)
 async def queue(ctx):
-    await client.say(f"__**CURRENT QUEUE:**__")
+    await client.say(f"__**CURRENT QUEUE__:**")
     for number, song in enumerate(song_name, 1):
         await client.say(f"{number}: {song}")
 
@@ -86,14 +86,14 @@ async def queue(ctx):
 async def vol(ctx, value: int):
     if song_queue:
         if value > 100:
-            await client.say("**Can't go higher than 100% volume..**")
+            await client.say("**Can't go higher than 100% volume**")
         else:
             song_volume.clear()
             song_queue[0].volume = value / 100
             song_volume.append(song_queue[0].volume)
             await client.say(f"**Volume set to:** {str(value)}%")
     else:
-        await client.say(f"**There's nothing playing, can't adjust volume..**")
+        await client.say(f"**There's nothing playing, can't adjust volume**")
 
 # Outputs current volume.
 @client.command(pass_context=True)
@@ -101,25 +101,25 @@ async def currentvol(ctx):
     if song_queue:
         await client.say(f"**Current volume:** {int(song_volume[0] * 100)}%")
     else:
-        await client.say(f"**There's nothing playing, no current volume..**")
+        await client.say(f"**There's nothing playing, no current volume**")
 
 # Resumes paused player.
 @client.command(pass_context=True)
 async def resume(ctx):
     if song_queue:
         song_queue[0].resume()
-        await client.say(f"**Resuming video..**")
+        await client.say(f"**Resuming video**")
     else:
-        await client.say(f"**There's nothing to resume..**")
+        await client.say(f"**There's nothing to resume**")
 
 # Pauses player.
 @client.command(pass_context=True)
 async def pause(ctx):
     if song_queue:
         song_queue[0].pause()
-        await client.say(f"**Pausing video..**")
+        await client.say(f"**Pausing video**")
     else:
-        await client.say(f"**There's nothing to pause..**")
+        await client.say(f"**There's nothing to pause**")
 
 # Makes bot leave the current voice channel.
 @client.command(pass_context=True)
@@ -131,9 +131,9 @@ async def leave(ctx):
         song_name.clear()
         song_volume.clear()
         await voice_client.disconnect()
-        print(f"[status] Cleared queue and disconnected..")
+        print(f"[status] Cleared queue and disconnected")
     else:
-        await client.say(f"**Can't leave if I'm not in a voice channel..**")
+        await client.say(f"**Can't leave if I'm not in a voice channel**")
 
 # Skips current song to the next song in queue.
 @client.command(pass_context=True)
@@ -141,9 +141,9 @@ async def skip(ctx):
     if song_queue:
         song_queue[0].pause()
         check_queue(ctx)
-        await client.say(f"**Skipping video..**")
+        await client.say(f"**Skipping video**")
     else:
-        await client.say(f"**There's nothing to skip..**")
+        await client.say(f"**There's nothing to skip**")
 
 # Outputs current weather in given area.
 @client.command(pass_context=True)
@@ -151,7 +151,7 @@ async def weather(ctx, *, place):
     weather_unit = Weather(unit=Unit.CELSIUS)
     location = weather_unit.lookup_by_location(place)
     condition = location.condition
-    await client.say(f"**Current weather in {place}:** {condition.temp}°C and {condition.text}..")
+    await client.say(f"**Current weather in {place}:** {condition.temp}°C and {condition.text}")
 
 # Outputs a two week forecast in given area.
 @client.command(pass_context=True)
@@ -161,7 +161,7 @@ async def forecast(ctx, *, place):
     forecasts = location.forecast
     await client.say(f"**Forecast for {place}:** ")
     for forecast in forecasts:
-        await client.say(f"**{forecast.day}:** {forecast.text}, with a high of {forecast.high}°C and a low of {forecast.low}°C..")
+        await client.say(f"**{forecast.day}:** {forecast.text}, with a high of {forecast.high}°C and a low of {forecast.low}°C")
 
 # Outputs a list of available bot commands.
 @client.command(pass_context=True)
