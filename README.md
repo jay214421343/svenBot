@@ -12,9 +12,9 @@ but it will still remain a fairly simple and lightweight music bot.
 | !resume           | Resumes a paused song                         |
 | !pause            | Pauses current song                           |
 | !leave            | Clears queue and leaves voice channel         |
-| !queue            | Prints out the current queue of songs         |
+| !queue            | Outputs out the current queue of songs        |
 | !vol              | Adjust volume using value between 1-100       |
-| !currentvol       | Displays current volume                       |
+| !currentvol       | Outputs current volume                        |
 | !weather          | Checks the current weather for given location |
 | !forecast         | Checks the forecast for the coming two weeks  |
-| !botcommands      | Displays all the bot features                 |
+| !botcommands      | Outputs all the bot features                  |
