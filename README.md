@@ -17,4 +17,4 @@ but it will still remain a fairly simple and lightweight music bot.
 | !currentvol       | Displays current volume                       |
 | !weather          | Checks the current weather for given location |
 | !forecast         | Checks the forecast for the coming two weeks  |
-| !help             | Displays all the bot features                 |
+| !botcommands      | Displays all the bot features                 |
