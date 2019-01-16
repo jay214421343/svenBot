@@ -95,15 +95,6 @@ async def vol(ctx, value: int):
     else:
         await client.say(f"**There's nothing playing, can't adjust volume**")
 
-# Outputs current volume.
-@client.command(pass_context=True)
-async def currentvol(ctx):
-    if song_queue:
-        await client.say(f"**Current volume:** {int(song_volume[0] * 100)}%")
-    else:
-        await client.say(f"**There's nothing playing, no current volume**")
-
-# Resumes paused player.
 @client.command(pass_context=True)
 async def resume(ctx):
     if song_queue:
@@ -175,7 +166,6 @@ async def botcommands(ctx):
         "**!leave:** Clears queue and leaves voice channel",
         "**!queue:** Prints out the current queue of songs",
         "**!vol:** Adjust volume using value between 1-100",
-        "**!currentvol:** Displays current volume",
         "**!weather:** Input a city name to get weather info",
         "**!forecast:** Input a city name to get forecast info"
     ]
