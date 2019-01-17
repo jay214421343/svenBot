@@ -81,7 +81,7 @@ async def queue(ctx):
     for number, song in enumerate(song_name, 1):
         await client.say(f"{number}: {song}")
 
-# Volume control
+# Volume control, will either change volume or display current volume.
 @client.command(pass_context=True)
 async def vol(ctx, *args):
     if song_queue:
@@ -162,15 +162,15 @@ async def forecast(ctx, *, place):
 async def botcommands(ctx):
     botcommands_list = [
         "__**Available commands for svenBot**__",
-        "**!play:** Plays/queues video, use URL or search string",
-        "**!skip:** Skips current song",
-        "**!resume:** Resumes a paused song",
-        "**!pause:** Pauses current song",
-        "**!leave:** Clears queue and leaves voice channel",
-        "**!queue:** Prints out the current queue of songs",
-        "**!vol:** Adjust volume using value between 1-100",
-        "**!weather:** Input a city name to get weather info",
-        "**!forecast:** Input a city name to get forecast info"
+        "**!play:** Plays/queues video, use URL or search string.",
+        "**!skip:** Skips current song.",
+        "**!resume:** Resumes a paused song.",
+        "**!pause:** Pauses current song.",
+        "**!leave:** Clears queue and leaves voice channel.",
+        "**!queue:** Prints out the current queue of songs.",
+        "**!vol:** Adjust volume using value between 1-100. No value will output current volume.",
+        "**!weather:** Input a city name to get weather info.",
+        "**!forecast:** Input a city name to get forecast info."
     ]
     await client.say(f"\n".join(botcommands_list))
 
