@@ -167,7 +167,7 @@ async def botcommands(ctx):
         "**!resume:** Resumes a paused song.",
         "**!pause:** Pauses current song.",
         "**!leave:** Clears queue and leaves voice channel.",
-        "**!queue:** Prints out the current queue of songs.",
+        "**!queue:** Outputs the current queue of songs.",
         "**!vol:** Adjust volume using value between 1-100 (no value will output current volume).",
         "**!weather:** Input a city name to get weather info.",
         "**!forecast:** Input a city name to get forecast info."
