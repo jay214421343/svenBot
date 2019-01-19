@@ -10,6 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 client = commands.Bot(command_prefix="!")
 
 # Lists that keeps track of volume, name and queued songs.
+# I was lazy with this one, will change all of this into a dictionary instead.
 song_queue = []
 song_name = []
 song_volume = []
