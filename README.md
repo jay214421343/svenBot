@@ -1,6 +1,7 @@
 # svenBot
 
-svenBot is a **simple/lightweight** non-guild music bot for Discord, made with **Python 3.6**.
+svenBot is a **simple/lightweight** non-guild music bot for Discord, made with **Python 3.6**. 
+Does require the host to have ffmpeg and libopus installed.
 
 ## Commands
 | Commands          | Description                                                                       |
