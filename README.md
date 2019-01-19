@@ -20,6 +20,7 @@ Ubuntu 16.04 LTS example (if you have something earlier than ffmpeg 3.4):
 $ sudo add-apt-repository ppa:jonathonf/ffmpeg-3
 $ sudo apt update
 $ sudo apt install ffmpeg
+$ sudo apt install libopus0
 ```
 
 ## Configure
