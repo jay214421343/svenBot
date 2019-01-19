@@ -12,7 +12,7 @@ Install required Python libraries (using requirements.txt that comes with this r
 ```
 $ pip install -r requirements.txt
 ```
-**Important:** This bot also requires the host to have ffmpeg and libopus installed on the system.
+**Important:** This bot also requires the host to have ffmpeg and libopus0 installed on the system.
 You should use this bot with ffmpeg 3.4+. Should be simple enough to figure out.
 
 Ubuntu 16.04 LTS example (if you have something earlier than ffmpeg 3.4):
