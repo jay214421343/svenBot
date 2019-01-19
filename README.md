@@ -12,7 +12,7 @@ Install required Python libraries (using requirements.txt that comes with this r
 $ pip install -r requirements.txt
 ```
 **Important:** This bot also requires the host to have ffmpeg and libopus installed on the system.
-You should use this bot with **ffmpeg 3.4+**. Should be simple enough to figure out.
+You should use this bot with ffmpeg 3.4+. Should be simple enough to figure out.
 
 ## Configure
 Now it's time to configure `config.py`. Go to https://discordapp.com/developers/applications/ 
