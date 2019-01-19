@@ -1,7 +1,28 @@
 # svenBot
-
 svenBot is a **simple/lightweight** non-guild music bot for Discord, made with **Python 3.6**. 
-Does require the host to have ffmpeg and libopus installed.
+
+## Installation
+Clone this repo.
+```
+$ git clone https://github.com/caene/svenBot.git
+```
+
+Install required Python libraries (using requirements.txt that comes with this repo).
+```
+$ pip install -r requirements.txt
+```
+
+## Configure
+Now it's time to configure `config.py`. Go to https://discordapp.com/developers/applications/ 
+and create an application, name the application/bot whatever you want. When you have 
+created the application, you should be able to see the "client secret" aka bot token by clicking 
+"Click to reveal". Copy that token into the `config.py` file. 
+
+## Run
+Run bot.py using Python 3.6, Python alias may vary.
+```
+$ python bot.py
+```
 
 ## Commands
 | Commands          | Description                                                                       |
