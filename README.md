@@ -1,5 +1,6 @@
 # svenBot
 svenBot is a **simple/lightweight** non-guild music bot for Discord, made with **Python 3.6**. 
+This bot is built for private hosting, custom use.
 
 ## Installation
 Clone this repo.
