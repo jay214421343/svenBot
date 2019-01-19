@@ -1,31 +1,33 @@
-import discord
 import logging
 import config
 from weather import Weather, Unit
-from youtube_dl import YoutubeDL
 from discord.ext import commands
+
 
 # Logs events in the console, does not write to file.
 logging.basicConfig(level=logging.DEBUG)
 
-client = commands.Bot(command_prefix = "!")
+client = commands.Bot(command_prefix="!")
 
 # Lists that keeps track of volume, name and queued songs.
 song_queue = []
 song_name = []
 song_volume = []
 
+
 # Initializes bot and prints out if the bot is ready/online.
 @client.event
 async def on_ready():
     print(f"[status] svenBot is now online.")
 
-# Removes the commands from Discord after being executed - clearing up all the clutter.
+
+# Removes the commands from Discord after being executed.
 @client.event
 async def on_message(message):
     if message.content.startswith("!"):
         await client.delete_message(message)
     await client.process_commands(message)
+
 
 # Checks the queue for media to play.
 def check_queue(ctx):
@@ -34,7 +36,8 @@ def check_queue(ctx):
     if song_queue:
         if song_volume:
             song_queue[0].volume = song_volume[0]
-        client.loop.create_task(client.send_message(ctx.message.channel, f"**Playing queued video:** {song_name[0]}"))
+        client.loop.create_task(client.send_message(ctx.message.channel, f"**P \
+            laying queued video:** {song_name[0]}"))
         print(f"[status] Playing queued video: {song_name[0]}")
         song_queue[0].start()
     else:
@@ -45,6 +48,7 @@ def check_queue(ctx):
         voice_client = client.voice_client_in(server)
         voice_client.loop.create_task(voice_client.disconnect())
         print(f"[status] Disconnected, no songs in queue")
+
 
 # Will summon the bot and play or queue media.
 @client.command(pass_context=True)
@@ -59,7 +63,10 @@ async def play(ctx, *, url):
             channel = ctx.message.author.voice.voice_channel
             await client.join_voice_channel(channel)
             voice_client = client.voice_client_in(server)
-        player = await voice_client.create_ytdl_player(url, ytdl_options=config.ydl_opts, after=lambda: check_queue(ctx), before_options=config.before_args)
+        player = await voice_client.create_ytdl_player(url,
+                                                       ytdl_options=config.ydl_opts,
+                                                       after=lambda: check_queue(ctx),
+                                                       before_options=config.before_args)
         player.volume = 0.10
         if song_queue:
             song_queue.append(player)
@@ -74,6 +81,7 @@ async def play(ctx, *, url):
             print(f"[status] Playing: {player.title}")
             await client.say(f"**Playing:** {player.title}")
 
+
 # Outputs the current queue.
 @client.command(pass_context=True)
 async def queue(ctx):
@@ -81,12 +89,14 @@ async def queue(ctx):
     for number, song in enumerate(song_name, 1):
         await client.say(f"{number}: {song}")
 
+
 # Volume control, will either change volume or display current volume.
 @client.command(pass_context=True)
-async def vol(ctx, *args):
+async def vol(ctx, *args, **kwargs):
     if song_queue:
         if not args:
-            await client.say(f"**Current volume:** {int(song_volume[0] * 100)}%")
+            await client.say(f"**Current volume:** \
+                             {int(song_volume[0] * 100)}%")
         elif int(args[0]) > 100:
             await client.say("**Can't go higher than 100% volume**")
         elif int(args[0]) <= 100:
@@ -97,6 +107,7 @@ async def vol(ctx, *args):
     else:
         await client.say(f"**There's nothing playing, can't adjust volume**")
 
+
 # Resumes paused player.
 @client.command(pass_context=True)
 async def resume(ctx):
@@ -106,6 +117,7 @@ async def resume(ctx):
     else:
         await client.say(f"**There's nothing to resume**")
 
+
 # Pauses player.
 @client.command(pass_context=True)
 async def pause(ctx):
@@ -114,6 +126,7 @@ async def pause(ctx):
         await client.say(f"**Pausing video**")
     else:
         await client.say(f"**There's nothing to pause**")
+
 
 # Makes bot leave the current voice channel.
 @client.command(pass_context=True)
@@ -129,6 +142,7 @@ async def leave(ctx):
     else:
         await client.say(f"**Can't leave if I'm not in a voice channel**")
 
+
 # Skips current song to the next song in queue.
 @client.command(pass_context=True)
 async def skip(ctx):
@@ -139,13 +153,16 @@ async def skip(ctx):
     else:
         await client.say(f"**There's nothing to skip**")
 
+
 # Outputs current weather in given area.
 @client.command(pass_context=True)
 async def weather(ctx, *, place):
     weather_unit = Weather(unit=Unit.CELSIUS)
     location = weather_unit.lookup_by_location(place)
     condition = location.condition
-    await client.say(f"**Current weather in {place}:** {condition.temp}°C and {condition.text}")
+    await client.say(f"**Current weather in {place}:** \
+                     {condition.temp}°C and {condition.text}")
+
 
 # Outputs a two week forecast in given area.
 @client.command(pass_context=True)
@@ -155,7 +172,9 @@ async def forecast(ctx, *, place):
     forecasts = location.forecast
     await client.say(f"**Forecast for {place}:** ")
     for forecast in forecasts:
-        await client.say(f"**{forecast.day}:** {forecast.text}, with a high of {forecast.high}°C and a low of {forecast.low}°C")
+        await client.say(f"**{forecast.day}:** {forecast.text}, with a high \
+                         of {forecast.high}°C and a low of {forecast.low}°C")
+
 
 # Outputs a list of available bot commands.
 @client.command(pass_context=True)
@@ -168,7 +187,8 @@ async def botcommands(ctx):
         "**!pause:** Pauses current song.",
         "**!leave:** Clears queue and leaves voice channel.",
         "**!queue:** Outputs the current queue of songs.",
-        "**!vol:** Adjust volume using value between 1-100 (no value will output current volume).",
+        "**!vol:** Adjust volume using value between 1-100 (no value will \
+        output current volume).",
         "**!weather:** Input a city name to get weather info.",
         "**!forecast:** Input a city name to get forecast info."
     ]
