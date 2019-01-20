@@ -26,8 +26,8 @@ $ sudo apt install libopus0
 ## Configure
 Now it's time to configure `config.py`. Go to https://discordapp.com/developers/applications/ 
 and create an application, name the application/bot whatever you want. When you have 
-created the application, you should be able to see the "client secret" aka bot token by clicking 
-"Click to reveal". Copy that token into the `config.py` file. 
+created the application, you should be able to see the token under the "Bot" tab, by clicking 
+"Click to reveal token". Copy that token into the `config.py` file. 
 
 ## Run
 Run bot.py using Python 3.6, Python alias may vary:
