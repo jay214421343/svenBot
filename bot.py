@@ -9,8 +9,12 @@ logging.basicConfig(level=logging.DEBUG)
 
 client = commands.Bot(command_prefix="!")
 
-# Lists that keeps track of volume, name and queued songs.
-# I was lazy with this one, will change all of this into a dictionary instead.
+# Lists that keeps track of volume, song names and queued players.
+# Maybe replace these lists with a OrdererdDict using collections instead?
+# Could be problematic trying to modify values in a specific order though..
+# I need proper indexing, which OrderedDicts doesn't have..
+# Which means you have to convert to lists and then manipulate data that way..
+# Doesn't seems so efficiant, but I will have to read up on it.
 song_queue = []
 song_name = []
 song_volume = []
@@ -37,8 +41,7 @@ def check_queue(ctx):
     if song_queue:
         if song_volume:
             song_queue[0].volume = song_volume[0]
-        client.loop.create_task(client.send_message(ctx.message.channel, f"**P \
-            laying queued video:** {song_name[0]}"))
+        client.loop.create_task(client.send_message(ctx.message.channel, f"**Playing queued video:** {song_name[0]}"))
         print(f"[status] Playing queued video: {song_name[0]}")
         song_queue[0].start()
     else:
@@ -64,23 +67,24 @@ async def play(ctx, *, url):
             channel = ctx.message.author.voice.voice_channel
             await client.join_voice_channel(channel)
             voice_client = client.voice_client_in(server)
-        player = await voice_client.create_ytdl_player(url,
-                                                       ytdl_options=config.ydl_opts,
-                                                       after=lambda: check_queue(ctx),
-                                                       before_options=config.before_args)
+        create_player = voice_client.create_ytdl_player
+        player = await create_player(url,
+                                     ytdl_options=config.ydl_opts,
+                                     after=lambda: check_queue(ctx),
+                                     before_options=config.before_args)
         player.volume = 0.10
         if song_queue:
             song_queue.append(player)
             song_name.append(player.title)
-            print(f"[status] Queuing: {player.title}")
-            await client.say(f"**Queuing video**")
+            print(f"[status] queuing: {player.title}")
+            await client.say(f"**queuing video**")
         else:
             song_queue.append(player)
             song_name.append(player.title)
+            song_volume.append(player.volume)
             player.start()
-            song_volume.append(song_queue[0].volume)
-            print(f"[status] Playing: {player.title}")
-            await client.say(f"**Playing:** {player.title}")
+            print(f"[status] playing: {player.title}")
+            await client.say(f"**playing:** {player.title}")
 
 
 # Outputs the current queue.
@@ -96,8 +100,7 @@ async def queue(ctx):
 async def vol(ctx, *args, **kwargs):
     if song_queue:
         if not args:
-            await client.say(f"**Current volume:** \
-                             {int(song_volume[0] * 100)}%")
+            await client.say(f"**Current volume:** {int(song_volume[0] * 100)}%")
         elif int(args[0]) > 100:
             await client.say("**Can't go higher than 100% volume**")
         elif int(args[0]) <= 100:
@@ -161,8 +164,7 @@ async def weather(ctx, *, place):
     weather_unit = Weather(unit=Unit.CELSIUS)
     location = weather_unit.lookup_by_location(place)
     condition = location.condition
-    await client.say(f"**Current weather in {place}:** \
-                     {condition.temp}°C and {condition.text}")
+    await client.say(f"**Current weather in {place}:** {condition.temp}°C and {condition.text}")
 
 
 # Outputs a two week forecast in given area.
@@ -173,8 +175,7 @@ async def forecast(ctx, *, place):
     forecasts = location.forecast
     await client.say(f"**Forecast for {place}:** ")
     for forecast in forecasts:
-        await client.say(f"**{forecast.day}:** {forecast.text}, with a high \
-                         of {forecast.high}°C and a low of {forecast.low}°C")
+        await client.say(f"**{forecast.day}:** {forecast.text}, with a high of {forecast.high}°C and a low of {forecast.low}°C")
 
 
 # Outputs a list of available bot commands.
@@ -188,11 +189,11 @@ async def botcommands(ctx):
         "**!pause:** Pauses current song.",
         "**!leave:** Clears queue and leaves voice channel.",
         "**!queue:** Outputs the current queue of songs.",
-        "**!vol:** Adjust volume using value between 1-100 (no value will \
-        output current volume).",
+        "**!vol:** Adjust volume using value between 1-100 (no value will output current volume).",
         "**!weather:** Input a city name to get weather info.",
         "**!forecast:** Input a city name to get forecast info."
     ]
     await client.say(f"\n".join(botcommands_list))
+
 
 client.run(config.token)

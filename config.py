@@ -1,11 +1,14 @@
 # Discord bot token
-token = "INSERT BOT TOKEN HERE"
+token = "NDMzNzA0MzUwODIxNTE1Mjc0.DypuTg.PRWhHtn7CuJ7xJikDA1mTEekjRA"
 
-# Added options for the YouTube Donwloader, telling it how to handle the downloaded/streamed media
+# Added options for the YouTube Donwloader.
 ydl_opts = {
     "default_search": "auto",
     "format": "bestaudio/best",
-    "postprocessors": [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}, {'key': 'FFmpegMetadata'}],
+    "postprocessors": [{'key': 'FFmpegExtractAudio',
+                        'preferredcodec': 'mp3',
+                        'preferredquality': '192'},
+                       {'key': 'FFmpegMetadata'}],
     "extractaudio": True,
     "nocheckcertificate": True,
     "ignoreerrors": True,
@@ -18,5 +21,5 @@ ydl_opts = {
     "noplaylist": True
     }
 
-# Arguments added to the YouTube Downloader/player, basically giving the player some time to catch up and reconnect to the media
+# Giving player/downloader time to reconnect to streamed media.
 before_args = "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"
