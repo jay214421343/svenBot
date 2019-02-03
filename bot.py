@@ -13,8 +13,8 @@ client = commands.Bot(command_prefix="!")
 # Maybe replace these lists with a OrdererdDict using collections instead?
 # Could be problematic trying to modify values in a specific order though..
 # I need proper indexing, which OrderedDicts doesn't have..
-# Which means you have to convert to lists and then manipulate data that way..
-# Doesn't seems so efficiant, but I will have to read up on it.
+# Which means you have to convert to lists and then manipulate data that way?
+# Doesn't seem so efficiant, but I will have to read up on it.
 song_queue = []
 song_name = []
 song_volume = []

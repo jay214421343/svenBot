@@ -12,7 +12,9 @@ Install required Python libraries (using requirements.txt that comes with this r
 ```
 $ pip install -r requirements.txt
 ```
-**Important:** This bot also requires the host to have ffmpeg and libopus0 installed on the system.
+**Important:** Installing the discord.py[voice] package (included in requirements.txt) 
+should be enough to get opus up and running, but if you're having issues with it connecting to voice, 
+then install libopus0 on your system. This bot also requires the host to have ffmpeg installed on the system.
 You should use this bot with ffmpeg 3.4+. Should be simple enough to figure out.
 
 Ubuntu 16.04 LTS example (if you have something earlier than ffmpeg 3.4):
