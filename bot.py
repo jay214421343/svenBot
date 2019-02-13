@@ -1,5 +1,6 @@
 import logging
 import config
+import player_options
 from weather import Weather, Unit
 from discord.ext import commands
 
@@ -7,7 +8,7 @@ from discord.ext import commands
 # Logs events in the console, does not write to file.
 logging.basicConfig(level=logging.DEBUG)
 
-client = commands.Bot(command_prefix="!")
+client = commands.Bot(command_prefix=config.prefix)
 
 # Lists that keeps track of volume, song names and queued players.
 # Maybe replace these lists with a OrdererdDict using collections instead?
@@ -41,7 +42,8 @@ def check_queue(ctx):
     if song_queue:
         if song_volume:
             song_queue[0].volume = song_volume[0]
-        client.loop.create_task(client.send_message(ctx.message.channel, f"**Playing queued video:** {song_name[0]}"))
+        client.loop.create_task(client.send_message(
+            ctx.message.channel, f"**Playing queued video:** {song_name[0]}"))
         print(f"[status] Playing queued video: {song_name[0]}")
         song_queue[0].start()
     else:
@@ -69,9 +71,9 @@ async def play(ctx, *, url):
             voice_client = client.voice_client_in(server)
         create_player = voice_client.create_ytdl_player
         player = await create_player(url,
-                                     ytdl_options=config.ydl_opts,
+                                     ytdl_options=player_options.ydl_opts,
                                      after=lambda: check_queue(ctx),
-                                     before_options=config.before_args)
+                                     before_options=player_options.before_args)
         player.volume = 0.10
         if song_queue:
             song_queue.append(player)
