@@ -1,9 +1,6 @@
 ydl_opts = {
 	'format': 'bestaudio/best',
-	"postprocessors": [{'key': 'FFmpegExtractAudio',
-						'preferredcodec': 'mp3',
-						'preferredquality': '192'},
-					   {'key': 'FFmpegMetadata'}],
+	"postprocessors": [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}, {'key': 'FFmpegMetadata'}],
 	'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
 	'restrictfilenames': True,
 	'noplaylist': True,
@@ -16,8 +13,6 @@ ydl_opts = {
 	'source_address': '0.0.0.0'
 }
 
-ffmpeg_options = {
-	'options': '-vn'
-}
+ffmpeg_options = {'options': '-vn'}
 
 before_args = "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"
