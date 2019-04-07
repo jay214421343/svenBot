@@ -1,201 +1,143 @@
+import discord
+import asyncio
 import logging
-import config
-import player_options
-from weather import Weather, Unit
+import youtube_dl
+from docs import player_options, config
 from discord.ext import commands
 
+logging.basicConfig(level=logging.ERROR)
+youtube_dl.utils.bug_reports_message = lambda: ""
 
-# Logs events in the console, does not write to file.
-logging.basicConfig(level=logging.DEBUG)
-
-client = commands.Bot(command_prefix=config.prefix)
-
-# Lists that keeps track of volume, song names and queued players.
-# Maybe replace these lists with a OrdererdDict using collections instead?
-# Could be problematic trying to modify values in a specific order though..
-# I need proper indexing, which OrderedDicts doesn't have..
-# Which means you have to convert to lists and then manipulate data that way?
-# Doesn't seem so efficiant, but I will have to read up on it.
-song_queue = []
-song_name = []
-song_volume = []
+bot = commands.Bot(command_prefix=config.prefix)
 
 
-# Initializes bot and prints out if the bot is ready/online.
-@client.event
+# Collecting media data and creating playable object.
+class YTDLSource(discord.PCMVolumeTransformer):
+	def __init__(self, source, *, data, volume=0.05):
+		super().__init__(source, volume)
+
+		self.data = data
+		self.title = data.get("title")
+		self.url = data.get("url")
+
+	@classmethod
+	async def from_url(cls, url, *, loop=None, stream=False):
+		ytdl = youtube_dl.YoutubeDL(player_options.ydl_opts)
+		loop = loop or asyncio.get_event_loop()
+		data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+		if "entries" in data:
+			data = data["entries"][0]
+		if stream:
+			filename = data["url"]
+		else:
+			ytdl.prepare_filename(data)
+		return cls(discord.FFmpegPCMAudio(filename, **player_options.ffmpeg_options, before_options=player_options.before_args), data=data)
+
+
+# Contains every function to manipulate the player and playable objects.
+class Music(commands.Cog):
+	def __init__(self, bot):
+		self.bot = bot
+		self.media_queue = []
+		self.media_name = []
+		self.media_volume = []
+
+	# Maybe swap this queue solution for asyncio tuples instead?
+	# asyncio.queue(), asyncio.next() etc.
+	def check_queue(self, ctx):
+		self.media_queue.pop(0)
+		self.media_name.pop(0)
+		if self.media_queue:
+			if self.media_volume:
+				self.media_queue[0].volume = self.media_volume[0]
+			bot.loop.create_task(ctx.send(f"**Playing queued media:** {self.media_name[0]}"))
+			print(f"[Status] Playing queued media: {self.media_name[0]}")
+			ctx.voice_client.play(self.media_queue[0], after=lambda e: self.check_queue(ctx))
+		else:
+			self.media_queue.clear()
+			self.media_name.clear()
+			self.media_volume.clear()
+			bot.loop.create_task(ctx.voice_client.disconnect())
+			print(f"[Status] Disconnected, no media in queue..")
+
+	@commands.command()
+	async def play(self, ctx, *, url):
+		if ctx.voice_client is None:
+			if ctx.author.voice:
+				await ctx.author.voice.channel.connect()
+			else:
+				await ctx.send(f"**You are not connected to a voice channel..**")
+				raise commands.CommandError("Author not connected to a voice channel..")
+		self.source = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+		if self.media_queue:
+			self.media_queue.append(self.source)
+			self.media_name.append(self.source.title)
+			print(f"[Status] Queuing: {self.source.title}")
+			await ctx.send(f"**Queuing:** {self.source.title}")
+		else:
+			ctx.voice_client.play(self.source, after=lambda e: self.check_queue(ctx))
+			self.media_queue.append(self.source)
+			self.media_name.append(self.source.title)
+			print(f"[Status] Playing: {self.source.title}")
+			await ctx.send(f"**Playing:** {self.source.title}")
+
+	@commands.command()
+	async def stop(self, ctx):
+		if ctx.voice_client is None:
+			return print(f"[Status] Not connected to a voice channel..")
+		else:
+			await ctx.voice_client.disconnect()
+			self.media_queue.clear()
+			self.media_name.clear()
+			self.media_volume.clear()
+			print(f"[Status] Stopped and cleared media queue..")
+
+	@commands.command()
+	async def skip(self, ctx):
+		if ctx.voice_client is None:
+			return print(f"[Status] Not connected to a voice channel..")
+		else:
+			ctx.voice_client.stop()
+			await ctx.send(f"**Skipping media..**")
+
+	@commands.command()
+	async def q(self, ctx):
+		if not self.media_queue:
+			await ctx.send(f"**No queued media..**")
+		else:
+			await ctx.send(f"**__Current queue__:**")
+			for media_num, media in enumerate(self.media_name, start=1):
+				await ctx.send(f"{media_num}: {media}")
+
+	@commands.command()
+	async def vol(self, ctx, volume: int):
+		volume = volume / 100
+		if ctx.voice_client is None:
+			return await ctx.send("Can't adjust volume, I'm not connected..")
+		elif volume > 1.0:
+			await ctx.send(f"**You can't go past 100% volume..**")
+		elif volume <= 0.0:
+			await ctx.send(f"**You can't go below 1% volume..**")
+		else:
+			self.media_volume.clear()
+			ctx.voice_client.source.volume = volume
+			self.media_volume.append(volume)
+			await ctx.send(f"**Changed volume to:** {int(volume * 100)}%")
+
+
+@bot.event
 async def on_ready():
-    print(f"[status] svenBot is now online.")
+	print(f"[Status] {bot.user} is now online..")
 
 
-# Removes the commands from Discord after being executed.
-@client.event
+# Event listener, picking up potential commands tied to the player functions.
+# It also cleans up used commands in chat.
+@bot.event
 async def on_message(message):
-    if message.content.startswith("!"):
-        await client.delete_message(message)
-    await client.process_commands(message)
+	if message.content.startswith("!"):
+		await message.delete()
+		await bot.process_commands(message)
 
 
-# Checks the queue for media to play.
-def check_queue(ctx):
-    song_queue.pop(0)
-    song_name.pop(0)
-    if song_queue:
-        if song_volume:
-            song_queue[0].volume = song_volume[0]
-        client.loop.create_task(client.send_message(
-            ctx.message.channel, f"**Playing queued video:** {song_name[0]}"))
-        print(f"[status] Playing queued video: {song_name[0]}")
-        song_queue[0].start()
-    else:
-        server = ctx.message.server
-        song_queue.clear()
-        song_name.clear()
-        song_volume.clear()
-        voice_client = client.voice_client_in(server)
-        voice_client.loop.create_task(voice_client.disconnect())
-        print(f"[status] Disconnected, no songs in queue")
-
-
-# Will summon the bot and play or queue media.
-@client.command(pass_context=True)
-async def play(ctx, *, url):
-    if "/playlist" in url:
-        await client.say(f"You can't queue playlists")
-    else:
-        server = ctx.message.server
-        if client.is_voice_connected(server):
-            voice_client = client.voice_client_in(server)
-        else:
-            channel = ctx.message.author.voice.voice_channel
-            await client.join_voice_channel(channel)
-            voice_client = client.voice_client_in(server)
-        create_player = voice_client.create_ytdl_player
-        player = await create_player(url,
-                                     ytdl_options=player_options.ydl_opts,
-                                     after=lambda: check_queue(ctx),
-                                     before_options=player_options.before_args)
-        player.volume = 0.10
-        if song_queue:
-            song_queue.append(player)
-            song_name.append(player.title)
-            print(f"[status] queuing: {player.title}")
-            await client.say(f"**queuing video**")
-        else:
-            song_queue.append(player)
-            song_name.append(player.title)
-            song_volume.append(player.volume)
-            player.start()
-            print(f"[status] playing: {player.title}")
-            await client.say(f"**playing:** {player.title}")
-
-
-# Outputs the current queue.
-@client.command(pass_context=True)
-async def queue(ctx):
-    await client.say(f"__**CURRENT QUEUE__:**")
-    for number, song in enumerate(song_name, 1):
-        await client.say(f"{number}: {song}")
-
-
-# Volume control, will either change volume or display current volume.
-@client.command(pass_context=True)
-async def vol(ctx, *args, **kwargs):
-    if song_queue:
-        if not args:
-            await client.say(f"**Current volume:** {int(song_volume[0] * 100)}%")
-        elif int(args[0]) > 100:
-            await client.say("**Can't go higher than 100% volume**")
-        elif int(args[0]) <= 100:
-            song_volume.clear()
-            song_queue[0].volume = int(args[0]) / 100
-            song_volume.append(song_queue[0].volume)
-            await client.say(f"**Volume set to:** {str(args[0])}%")
-    else:
-        await client.say(f"**There's nothing playing, can't adjust volume**")
-
-
-# Resumes paused player.
-@client.command(pass_context=True)
-async def resume(ctx):
-    if song_queue:
-        song_queue[0].resume()
-        await client.say(f"**Resuming video**")
-    else:
-        await client.say(f"**There's nothing to resume**")
-
-
-# Pauses player.
-@client.command(pass_context=True)
-async def pause(ctx):
-    if song_queue:
-        song_queue[0].pause()
-        await client.say(f"**Pausing video**")
-    else:
-        await client.say(f"**There's nothing to pause**")
-
-
-# Makes bot leave the current voice channel.
-@client.command(pass_context=True)
-async def leave(ctx):
-    server = ctx.message.server
-    if client.voice_client_in(server):
-        voice_client = client.voice_client_in(server)
-        song_queue.clear()
-        song_name.clear()
-        song_volume.clear()
-        await voice_client.disconnect()
-        print(f"[status] Cleared queue and disconnected")
-    else:
-        await client.say(f"**Can't leave if I'm not in a voice channel**")
-
-
-# Skips current song to the next song in queue.
-@client.command(pass_context=True)
-async def skip(ctx):
-    if song_queue:
-        song_queue[0].pause()
-        check_queue(ctx)
-        await client.say(f"**Skipping video**")
-    else:
-        await client.say(f"**There's nothing to skip**")
-
-
-# Outputs current weather in given area.
-@client.command(pass_context=True)
-async def weather(ctx, *, place):
-    weather_unit = Weather(unit=Unit.CELSIUS)
-    location = weather_unit.lookup_by_location(place)
-    condition = location.condition
-    await client.say(f"**Current weather in {place}:** {condition.temp}°C and {condition.text}")
-
-
-# Outputs a two week forecast in given area.
-@client.command(pass_context=True)
-async def forecast(ctx, *, place):
-    weather_unit = Weather(unit=Unit.CELSIUS)
-    location = weather_unit.lookup_by_location(place)
-    forecasts = location.forecast
-    await client.say(f"**Forecast for {place}:** ")
-    for forecast in forecasts:
-        await client.say(f"**{forecast.day}:** {forecast.text}, with a high of {forecast.high}°C and a low of {forecast.low}°C")
-
-
-# Outputs a list of available bot commands.
-@client.command(pass_context=True)
-async def botcommands(ctx):
-    botcommands_list = [
-        "__**Available commands for svenBot**__",
-        "**!play:** Plays/queues video, use URL or search string.",
-        "**!skip:** Skips current song.",
-        "**!resume:** Resumes a paused song.",
-        "**!pause:** Pauses current song.",
-        "**!leave:** Clears queue and leaves voice channel.",
-        "**!queue:** Outputs the current queue of songs.",
-        "**!vol:** Adjust volume using value between 1-100 (no value will output current volume).",
-        "**!weather:** Input a city name to get weather info.",
-        "**!forecast:** Input a city name to get forecast info."
-    ]
-    await client.say(f"\n".join(botcommands_list))
-
-
-client.run(config.token)
+bot.add_cog(Music(bot))
+bot.run(config.discord_bot_token)
