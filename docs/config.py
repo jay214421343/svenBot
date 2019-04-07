@@ -1,2 +1,2 @@
-discord_bot_token = "NDMzNzA0MzUwODIxNTE1Mjc0.XKimwA._FleaCaccoyDuFZikH322MFE9qo"
+discord_bot_token = "YOUR TOKEN HERE"
 prefix = "!"
