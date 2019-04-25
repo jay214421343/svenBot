@@ -5,3 +5,4 @@ tox.ini
 bot.py~
 docs/config.py~
 docs/player_options.py~
+docs/__pycache__
